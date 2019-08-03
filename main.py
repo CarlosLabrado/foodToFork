@@ -37,10 +37,11 @@ class Food:
 
     def create_api_string(self, ingredients):
         """
-        Creates a valid string to pass on the API (with the %20 instead of spaces)
+        Creates a valid string to pass on the API (with the %20 instead of spaces), also populates the _local_ing_list
+        with the ingredients that we are going to compare.
 
-        :param ingredients:
-        :return:
+        :param ingredients: comma, dot or space separated ingredients
+        :return: valid string for the API
         """
 
         split_char = None
@@ -54,7 +55,7 @@ class Food:
         first = True
         ing_list = ingredients.split(split_char)
         for ingredient in ing_list:
-            if not ingredient.isdigit():  # if is not a number
+            if not ingredient.isdigit():  # ignore numbers.
                 self._local_ing_list.append(ingredient)
                 if first:
                     result = ingredient
@@ -65,6 +66,13 @@ class Food:
         return result
 
     def get_missing_ingredients(self, recipe_json):
+        """
+        Gets the initial json with all the top recipes that meet our criteria and then creates a second request for
+        the top recipe only that includes all the ingredients, then we compare to the received ingredients to return
+        the missing ones.
+        :param recipe_json: initial json with the top recipes
+        :return: the missing ingredients list
+        """
         try:
             ingredients = []
 
