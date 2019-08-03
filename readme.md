@@ -22,11 +22,17 @@ PyYAML \
 
 ### How to use
 
-Pass space separated, coma separated or dot separated ingredients with --i example:
+Just run it with `python3 main.py` and wait for the input prompt to type in the list of ingredients separated by spaces,
+commas or dots.
+
+Or pass space separated, coma separated or dot separated ingredients with --i example:
 ```bash
 python3 main.py --i 'onion tomato'
 ```
 Optionally you can pass your API Key as an argument with --c
+```bash
+python3 main.py --i 'onion tomato' --c '<YOUR API KEY>'
+```
 
 ## Food2Fork API
 https://www.food2fork.com/about/api

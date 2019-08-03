@@ -1,6 +1,7 @@
 import requests
 import yaml
 import argparse
+import time
 
 
 class Food:
@@ -10,12 +11,35 @@ class Food:
     _api_ing_list = []
 
     def __init__(self, credentials, ingredients):
+        """
+        Initializes the variables either from the arguments or the command line, then calls the main func
+        :param credentials: can be empty and if they are we get them from the YAML
+        :param ingredients: can be empty and if they are we get them from the terminal
+        """
         if credentials is None:
             self._api_key = self.get_key()
         else:
             self._api_key = credentials
 
-        self._ingredient_string = self.create_api_string(ingredients=ingredients)
+        print('Welcome to food2fork python')
+
+        # we don't want the ingredients to be spaces or empty
+        if ingredients is None or ingredients == '' or ingredients.isspace():
+            lock = True
+            while lock:
+                print('Please enter your ingredients separated by space, comma or a dot.')
+                input_ing = input('Which ingredients do you have?: ')
+                if input_ing is None or input_ing == '' or input_ing.isspace():
+                    print('\nWe need some ingredients to proceed, please input some ingredients\n')
+                    time.sleep(2)
+                else:
+                    lock = False
+                    self._ingredient_string = self.create_api_string(ingredients=input_ing)
+
+        else:
+            self._ingredient_string = self.create_api_string(ingredients=ingredients)
+
+        self.main_func()
 
     def get_key(self):
         """
@@ -128,9 +152,12 @@ class Food:
 
             if 'error' not in recipe_json:
                 missing_ingredients = self.get_missing_ingredients(recipe_json)
-                print('Missing ingredients:')
-                for ingredient in missing_ingredients:
-                    print('- {0}'.format(ingredient))
+                if missing_ingredients is not None:
+                    print('Missing ingredients:')
+                    for ingredient in missing_ingredients:
+                        print('- {0}'.format(ingredient))
+
+                    print('Thank you for using food2fork python.')
             else:
                 if recipe_json['error'] == 'limit':
                     raise Exception('We have reach the API quota for the day.')
@@ -145,5 +172,4 @@ parser.add_argument('--i', help='Ingredients')
 
 args = parser.parse_args()
 
-thing = Food(credentials=args.c, ingredients=args.i)
-thing.main_func()
+food_app = Food(credentials=args.c, ingredients=args.i)
