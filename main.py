@@ -31,9 +31,9 @@ class Food:
 
             return keys['api_key']
         except yaml.YAMLError as e:
-            print('Could not read from the YAML: {0}'.format(e))
+            print('Error getting the api key, could not read from the YAML: {0}'.format(e))
         except Exception as e:
-            print('Could not get the api key from the YAML: {0}'.format(e))
+            print('Error getting the api key: {0}'.format(e))
 
     def create_api_string(self, ingredients):
         """
@@ -45,25 +45,28 @@ class Food:
         """
 
         split_char = None
+        try:
+            if ingredients.find(',') > 0:
+                split_char = ','
+            elif ingredients.find('.') > 0:
+                split_char = '.'
 
-        if ingredients.find(',') > 0:
-            split_char = ','
-        elif ingredients.find('.') > 0:
-            split_char = '.'
+            result = ''
+            first = True
+            ing_list = ingredients.split(split_char)
+            for ingredient in ing_list:
+                if not ingredient.isdigit():  # ignore numbers.
+                    lc_ingredient = ingredient.lower()  # we only want to deal with lower case
+                    self._local_ing_list.append(lc_ingredient)
+                    if first:
+                        result = lc_ingredient
+                        first = False
+                    else:
+                        result = result + '%20' + lc_ingredient
 
-        result = ''
-        first = True
-        ing_list = ingredients.split(split_char)
-        for ingredient in ing_list:
-            if not ingredient.isdigit():  # ignore numbers.
-                self._local_ing_list.append(ingredient)
-                if first:
-                    result = ingredient
-                    first = False
-                else:
-                    result = result + '%20' + ingredient
-
-        return result
+            return result
+        except Exception as e:
+            print('Error trying to create the api string: {0}'.format(e))
 
     def get_missing_ingredients(self, recipe_json):
         """
@@ -80,6 +83,12 @@ class Food:
                 recipes = recipe_json['recipes']
                 if len(recipes) > 0:
                     recipe_id = recipes[0]['recipe_id']
+                    print('Top recipe: {0}'.format(recipes[0]['title'].capitalize()))
+
+                    print('Your ingredients:')
+                    for local_ingredient in self._local_ing_list:
+                        print('- {0}'.format(local_ingredient.capitalize()))
+
                     r2 = requests.get(
                         'https://www.food2fork.com/api/get?key={0}&rId={1}'.format(self._api_key, recipe_id))
 
@@ -90,7 +99,8 @@ class Food:
                         for local_ing in self._local_ing_list:
                             # we create a slice copy of the list so we can remove while iterating
                             for ingredient in ingredients[:]:
-                                if local_ing in ingredient.lower():
+                                # sometimes the requested ingredient is in plural, so we also check without the 's'
+                                if local_ing in ingredient.lower() or local_ing[0:-1] in ingredient.lower():
                                     ingredients.remove(ingredient)
 
                 else:
@@ -99,17 +109,15 @@ class Food:
             return ingredients
 
         except IndexError as ie:
-            print('The recipe list is empty: {0}'.format(ie))
+            print('Error getting the missing ingredients, the recipe list is empty: {0}'.format(ie))
         except KeyError as ke:
-            print('the key does not exist: {0}'.format(ke))
+            print('Error getting the missing ingredients, the key does not exist: {0}'.format(ke))
         except Exception as e:
-            print('There was an error getting the JSON: {0}'.format(e))
+            print('Error getting the missing ingredients : {0}'.format(e))
 
     def main_func(self):
 
         try:
-            print(self._ingredient_string)
-
             r = requests.get(
                 'https://www.food2fork.com/api/search?key={0}&q={1}'.format(self._api_key, self._ingredient_string))
 
@@ -120,12 +128,14 @@ class Food:
 
             if 'error' not in recipe_json:
                 missing_ingredients = self.get_missing_ingredients(recipe_json)
-                print(missing_ingredients)
+                print('Missing ingredients:')
+                for ingredient in missing_ingredients:
+                    print('- {0}'.format(ingredient))
             else:
                 if recipe_json['error'] == 'limit':
                     raise Exception('We have reach the API quota for the day.')
         except Exception as e:
-            print('Request error: {0}'.format(e))
+            print('Main error: {0}'.format(e))
 
 
 parser = argparse.ArgumentParser()
