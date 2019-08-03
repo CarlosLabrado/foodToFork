@@ -168,7 +168,7 @@ class Food:
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--c', help='API Credentials')
-parser.add_argument('--i', help='Ingredients')
+parser.add_argument('--i', help='Space separated, comma separated or dot separated Ingredients')
 
 args = parser.parse_args()
 
