@@ -8,16 +8,21 @@ Needs python 3.6
 * [requests](https://2.python-requests.org/en/master/) python Requests
 * [PyYAML](https://pyyaml.org/wiki/PyYAMLDocumentation) handles the unversioned YAML file with the credentials
 
-Also needs a `credentials.yaml` file in the root of the directory with your API key, formatted like this:
-```yaml
-api_key: '<YOUR API KEY>'
-```
-
 ### Build with
 ```docker
 pip3 install \
 requests \ 
 PyYAML \
+```
+
+### Setup
+Can have a `credentials.yaml` file in the root of the directory with your API key, formatted like this:
+```yaml
+api_key: '<YOUR API KEY>'
+```
+Or you can pass your API Key as an argument with --c
+```bash
+python3 main.py --c '<YOUR API KEY>'
 ```
 
 ### How to use
@@ -29,10 +34,9 @@ Or pass space separated, coma separated or dot separated ingredients with --i ex
 ```bash
 python3 main.py --i 'onion tomato'
 ```
-Optionally you can pass your API Key as an argument with --c
-```bash
-python3 main.py --i 'onion tomato' --c '<YOUR API KEY>'
-```
 
 ## Food2Fork API
 https://www.food2fork.com/about/api
+
+## Author
+* Carlos Labrado
